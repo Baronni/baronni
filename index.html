@@ -1,400 +1,572 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bolão Copa do Mundo</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,sans-serif;background:#1a1a2e;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center}
-.container{max-width:1100px;width:100%;padding:20px}
-.card{background:#16213e;border-radius:12px;padding:20px;margin-bottom:20px}
-.login-box{max-width:400px;margin:80px auto}
-h2{text-align:center;margin-bottom:20px;color:#e94560}
-input,select,button{width:100%;padding:10px;margin:8px 0;border-radius:6px;border:none;font-size:16px}
-input,select{background:#0f3460;color:#fff}
-button{background:#e94560;color:#fff;cursor:pointer;font-weight:bold}
-button:hover{background:#c2314a}
-.tabs{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
-.tab-btn{flex:1;background:#0f3460;padding:12px;text-align:center;cursor:pointer;border-radius:8px;min-width:100px}
-.tab-btn.active{background:#e94560}
-.tab-content{display:none}
-.tab-content.active{display:block}
-.game-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #0f3460;flex-wrap:wrap}
-.game-row .teams{min-width:180px;font-weight:bold}
-.game-row .my-pick{display:flex;gap:5px;align-items:center}
-.game-row .my-pick input{width:50px;padding:5px;text-align:center}
-.others-scroll{display:flex;gap:8px;overflow-x:auto;flex:1;padding:5px 0}
-.other-pick{min-width:70px;background:#0f3460;border-radius:6px;padding:4px 8px;text-align:center;font-size:12px}
-.filter-dropdown{max-width:250px;margin-bottom:15px}
-.ranking-table{width:100%;border-collapse:collapse}
-.ranking-table th,.ranking-table td{padding:8px;text-align:center;border-bottom:1px solid #0f3460}
-.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:1000}
-.modal-content{background:#16213e;padding:30px;border-radius:12px;max-width:450px;width:90%}
-@media(max-width:600px){.game-row{flex-direction:column;align-items:stretch}.others-scroll{max-width:100%}}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Arial, sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; display: flex; flex-direction: column; }
+header { background: #16213e; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; }
+.header-left { display: flex; align-items: center; gap: 10px; }
+.header-left h1 { font-size: 1.5rem; color: #f0c040; }
+.header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.header-right button, .header-right input { padding: 5px 10px; border: none; border-radius: 4px; }
+.header-right input { background: #0f3460; color: #eee; }
+.header-right button { background: #e94560; color: #fff; cursor: pointer; }
+.header-right button:hover { background: #c0392b; }
+.tabs { display: flex; background: #0f3460; flex-wrap: wrap; }
+.tabs button { flex: 1; padding: 12px; background: #0f3460; color: #aaa; border: none; cursor: pointer; font-size: 1rem; transition: 0.3s; min-width: 80px; }
+.tabs button.active { background: #1a1a2e; color: #fff; border-bottom: 2px solid #f0c040; }
+.tab-content { display: none; padding: 20px; overflow-x: auto; }
+.tab-content.active { display: block; }
+.table-container { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 600px; }
+th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #333; }
+th { background: #16213e; position: sticky; top: 0; }
+tr:hover { background: #0f3460; }
+.dropdown { padding: 5px 10px; margin-bottom: 10px; background: #0f3460; color: #eee; border: none; border-radius: 4px; }
+.btn { padding: 8px 16px; background: #e94560; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+.btn:hover { background: #c0392b; }
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 1000; }
+.modal-content { background: #16213e; padding: 30px; border-radius: 8px; max-width: 400px; width: 90%; }
+.modal-content h2 { margin-bottom: 20px; }
+.modal-content input { width: 100%; padding: 10px; margin: 10px 0; background: #0f3460; color: #eee; border: none; border-radius: 4px; }
+.modal-content button { width: 100%; padding: 10px; background: #e94560; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+@media (max-width: 600px) {
+  header { flex-direction: column; align-items: stretch; }
+  .header-right { justify-content: flex-end; margin-top: 5px; }
+  .tabs button { font-size: 0.9rem; padding: 10px; }
+}
 </style>
 </head>
 <body>
-<div id="app" class="container"></div>
-<script>
-// ========== DATA ==========
-const groups = [
-  {group:'A', teams:['Holanda','Senegal','Catar','Equador']},
-  {group:'B', teams:['Inglaterra','País de Gales','Irã','EUA']},
-  {group:'C', teams:['Argentina','Polônia','México','Arábia Saudita']},
-  {group:'D', teams:['França','Dinamarca','Tunísia','Austrália']},
-  {group:'E', teams:['Espanha','Alemanha','Japão','Costa Rica']},
-  {group:'F', teams:['Bélgica','Marrocos','Croácia','Canadá']},
-  {group:'G', teams:['Brasil','Suíça','Camarões','Sérvia']},
-  {group:'H', teams:['Portugal','Uruguai','Gana','Coreia do Sul']}
-];
-const games = [];
-groups.forEach(g=>{
-  for(let i=0;i<g.teams.length;i++){
-    for(let j=i+1;j<g.teams.length;j++){
-      games.push({group:g.group,team1:g.teams[i],team2:g.teams[j],id:`${g.group}_${i}_${j}`});
-    }
-  }
-});
+<header>
+  <div class="header-left">
+    <h1>⚽ Bolão</h1>
+  </div>
+  <div class="header-right" id="headerRight">
+    <input type="text" id="loginUser" placeholder="Usuário">
+    <input type="password" id="loginPass" placeholder="Senha">
+    <button onclick="login()">Login</button>
+  </div>
+</header>
 
-// ========== STATE ==========
-let currentUser = null;
-let users = JSON.parse(localStorage.getItem('bolao_users')) || [];
-let picks = JSON.parse(localStorage.getItem('bolao_picks')) || {};
-let results = JSON.parse(localStorage.getItem('bolao_results')) || {};
-let locked = JSON.parse(localStorage.getItem('bolao_locked')) || false;
+<!-- Modal Primeira Troca de Senha -->
+<div id="changePasswordModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <h2>Primeiro acesso - Troque sua senha</h2>
+    <input type="password" id="newPass" placeholder="Nova senha">
+    <input type="password" id="confirmPass" placeholder="Confirmar senha">
+    <button onclick="changePassword()">Salvar</button>
+    <p id="changePassError" style="color:red;"></p>
+  </div>
+</div>
 
-function saveUsers(){localStorage.setItem('bolao_users',JSON.stringify(users));}
-function savePicks(){localStorage.setItem('bolao_picks',JSON.stringify(picks));}
-function saveResults(){localStorage.setItem('bolao_results',JSON.stringify(results));}
-function saveLocked(){localStorage.setItem('bolao_locked',JSON.stringify(locked));}
-
-// Helper
-function findUser(name){return users.find(u=>u.name===name);}
-function genRandomPassword(){return Math.random().toString(36).slice(2,8);}
-
-// ========== RENDER ==========
-const app = document.getElementById('app');
-
-function render(){
-  if(!currentUser){
-    showPublicRanking();
-  } else {
-    const user = findUser(currentUser);
-    if(!user){currentUser=null;render();return;}
-    if(user.forceChangePassword){
-      showChangePasswordModal();
-    } else {
-      showUserPanel();
-    }
-  }
-}
-
-function showPublicRanking(){
-  const html = `
-    <h2>Ranking - Bolão Copa do Mundo</h2>
-    <div class="card">
-      <h3>Classificação</h3>
-      ${rankingTable()}
-    </div>
-    <div class="card login-box">
-      <h2>Login</h2>
-      <input type="text" id="loginName" placeholder="Nome">
-      <input type="password" id="loginPass" placeholder="Senha">
-      <button onclick="login()">Entrar</button>
-      <p style="color:#e94560;text-align:center;margin-top:10px;min-height:20px" id="loginError"></p>
-    </div>
-  `;
-  app.innerHTML = html;
-}
-
-function login(){
-  const name = document.getElementById('loginName').value.trim();
-  const pass = document.getElementById('loginPass').value.trim();
-  const user = findUser(name);
-  if(!user || user.password !== pass){
-    document.getElementById('loginError').textContent = 'Usuário ou senha inválidos';
-    return;
-  }
-  currentUser = name;
-  render();
-}
-
-function showChangePasswordModal(){
-  app.innerHTML = `
-    <div class="modal" id="changePassModal">
-      <div class="modal-content">
-        <h2>Você precisa trocar sua senha</h2>
-        <input type="password" id="currentPass" placeholder="Senha Atual">
-        <input type="password" id="newPass" placeholder="Nova Senha">
-        <input type="password" id="confirmPass" placeholder="Confirmar Nova Senha">
-        <button onclick="changePassword()">Alterar Senha</button>
-        <p id="passError" style="color:#e94560;text-align:center;margin-top:10px"></p>
-      </div>
-    </div>
-  `;
-}
-
-function changePassword(){
-  const user = findUser(currentUser);
-  const current = document.getElementById('currentPass').value.trim();
-  const newPass = document.getElementById('newPass').value.trim();
-  const confirm = document.getElementById('confirmPass').value.trim();
-  if(current !== user.password){
-    document.getElementById('passError').textContent = 'Senha atual incorreta';
-    return;
-  }
-  if(newPass.length < 4){
-    document.getElementById('passError').textContent = 'Nova senha deve ter ao menos 4 caracteres';
-    return;
-  }
-  if(newPass !== confirm){
-    document.getElementById('passError').textContent = 'Nova senha e confirmação não conferem';
-    return;
-  }
-  user.password = newPass;
-  user.forceChangePassword = false;
-  saveUsers();
-  render();
-}
-
-function showUserPanel(){
-  const user = findUser(currentUser);
-  const isAdmin = currentUser === 'admin';
-  let tabs = ['Ranking','Meus Palpites','Resultados'];
-  if(isAdmin) tabs.push('Admin');
-  const tabLinks = tabs.map(t=>`<div class="tab-btn" onclick="switchTab('${t}')">${t}</div>`).join('');
-  app.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <h2>Bem-vindo, ${currentUser}</h2>
-      <button onclick="logout()" style="width:auto;padding:8px 20px">Logout</button>
-    </div>
-    <div class="tabs">${tabLinks}</div>
-    <div id="tabContent"></div>
-  `;
-  switchTab('Ranking');
-}
-
-function switchTab(tabName){
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  event.target.classList.add('active');
-  const content = document.getElementById('tabContent');
-  if(tabName === 'Ranking') content.innerHTML = rankingSection();
-  else if(tabName === 'Meus Palpites') content.innerHTML = myPicksSection();
-  else if(tabName === 'Resultados') content.innerHTML = resultsSection();
-  else if(tabName === 'Admin') content.innerHTML = adminSection();
-}
-
-function rankingSection(){
-  return `
-    <div class="card">
-      <h3>Classificação</h3>
-      ${rankingTable()}
-    </div>
-  `;
-}
-
-function rankingTable(){
-  const allUsers = users.filter(u=>u.name!=='admin');
-  const scores = allUsers.map(u=>{
-    let total = 0;
-    if(picks[u.name]){
-      games.forEach(g=>{
-        const userPick = picks[u.name][g.id];
-        const official = results[g.id];
-        if(userPick && official && userPick.gols1 !== '' && userPick.gols2 !== '' && official.gols1 !== '' && official.gols2 !== ''){
-          const up1 = parseInt(userPick.gols1), up2 = parseInt(userPick.gols2);
-          const og1 = parseInt(official.gols1), og2 = parseInt(official.gols2);
-          if(up1===og1 && up2===og2) total+=3;
-          else {
-            const uRes = up1>up2?1:(up1===up2?0:-1);
-            const oRes = og1>og2?1:(og1===og2?0:-1);
-            if(uRes===oRes) total+=1;
-          }
-        }
-      });
-    }
-    return {name:u.name,score:total};
-  });
-  scores.sort((a,b)=>b.score-a.score);
-  let rows = '<table class="ranking-table"><tr><th>Pos</th><th>Nome</th><th>Pontos</th></tr>';
-  scores.forEach((s,i)=>{
-    rows+=`<tr><td>${i+1}</td><td>${s.name}</td><td>${s.score}</td></tr>`;
-  });
-  rows+='</table>';
-  return rows;
-}
-
-function myPicksSection(){
-  const allUsers = users.filter(u=>u.name!=='admin' && u.name!==currentUser);
-  let filterDropdown = `
-    <select class="filter-dropdown" id="filterUser" onchange="renderPicksTable()">
+<div id="mainContent">
+  <!-- Abas da página inicial -->
+  <div class="tabs" id="publicTabs">
+    <button class="active" onclick="switchPublicTab('ranking')">Ranking</button>
+    <button onclick="switchPublicTab('guesses')">Palpites</button>
+  </div>
+  <div id="publicTabRanking" class="tab-content active">
+    <div id="rankingTable"></div>
+  </div>
+  <div id="publicTabGuesses" class="tab-content">
+    <label>Filtrar jogador:</label>
+    <select id="publicFilter" class="dropdown" onchange="renderPublicGuesses()">
       <option value="all">Ver todos</option>
-      ${allUsers.map(u=>`<option value="${u.name}">${u.name}</option>`).join('')}
     </select>
-  `;
-  return `${filterDropdown}<div id="picksTable"></div>`;
+    <div id="publicGuessesTable"></div>
+  </div>
+</div>
+
+<!-- Área do usuário logado (inicialmente oculta) -->
+<div id="userArea" style="display:none;">
+  <div class="tabs" id="userTabs">
+    <button class="active" onclick="switchUserTab('ranking')">Ranking</button>
+    <button onclick="switchUserTab('myguesses')">Meus Palpites</button>
+    <button onclick="switchUserTab('results')">Resultados</button>
+  </div>
+  <div id="userTabRanking" class="tab-content active">
+    <div id="userRankingTable"></div>
+  </div>
+  <div id="userTabMyGuesses" class="tab-content">
+    <p>Seu palpite:</p>
+    <div id="myGuessesSection"></div>
+    <hr>
+    <p>Palpites dos outros:</p>
+    <label>Filtrar jogador:</label>
+    <select id="otherFilter" class="dropdown" onchange="renderOtherGuesses()">
+      <option value="all">Ver todos</option>
+    </select>
+    <div id="otherGuessesTable"></div>
+  </div>
+  <div id="userTabResults" class="tab-content">
+    <div id="resultsTable"></div>
+  </div>
+  <button class="btn" onclick="saveMyGuesses()" style="margin:20px;">Salvar Palpites</button>
+</div>
+
+<!-- Admin area (oculta) -->
+<div id="adminArea" style="display:none;">
+  <div class="tabs" id="adminTabs">
+    <button class="active" onclick="switchAdminTab('users')">Usuários</button>
+    <button onclick="switchAdminTab('matches')">Jogos</button>
+    <button onclick="switchAdminTab('results')">Resultados</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+  <div id="adminTabUsers" class="tab-content active">
+    <h3>Cadastrar Usuário</h3>
+    <input type="text" id="newUserName" placeholder="Nome">
+    <button onclick="registerUser()">Cadastrar</button>
+    <h3>Usuários</h3>
+    <div id="userList"></div>
+  </div>
+  <div id="adminTabMatches" class="tab-content">
+    <p>Inserir resultados oficiais dos jogos</p>
+    <div id="adminResultsInput"></div>
+  </div>
+  <div id="adminTabResults" class="tab-content">
+    <button onclick="lockGuesses()" id="lockBtn">Bloquear Palpites</button>
+    <button onclick="resetAllPasswords()">Resetar Todas as Senhas</button>
+  </div>
+</div>
+
+<script>
+// Dados
+const groups = ['A','B','C','D','E','F','G','H'];
+const teams = {
+  A: ['Holanda','Senegal','Catar','Equador'],
+  B: ['Inglaterra','País de Gales','Irã','EUA'],
+  C: ['Argentina','Polônia','México','Arábia Saudita'],
+  D: ['França','Dinamarca','Tunísia','Austrália'],
+  E: ['Espanha','Alemanha','Japão','Costa Rica'],
+  F: ['Bélgica','Marrocos','Croácia','Canadá'],
+  G: ['Brasil','Suíça','Camarões','Sérvia'],
+  H: ['Portugal','Uruguai','Gana','Coreia do Sul']
+};
+
+let matches = [];
+let matchId = 1;
+for (let g of groups) {
+  let t = teams[g];
+  for (let i = 0; i < t.length; i++) {
+    for (let j = i+1; j < t.length; j++) {
+      matches.push({ id: matchId++, group: g, home: t[i], away: t[j], homeScore: null, awayScore: null });
+    }
+  }
+}
+// 48 jogos
+
+// Dados de usuários
+let users = [
+  { username: 'admin', password: 'admin123', firstLogin: false, isAdmin: true },
+  { username: 'joao', password: '123456', firstLogin: true, isAdmin: false },
+  { username: 'maria', password: 'abcdef', firstLogin: true, isAdmin: false }
+];
+
+let guesses = {}; // username -> { matchId: { homeScore, awayScore } }
+let results = {}; // matchId -> { homeScore, awayScore } oficial
+let locked = false;
+let currentUser = null;
+let isAdmin = false;
+
+// Carregar dados localStorage
+function loadData() {
+  const stored = localStorage.getItem('bolaoData');
+  if (stored) {
+    const data = JSON.parse(stored);
+    users = data.users;
+    guesses = data.guesses;
+    results = data.results;
+    locked = data.locked || false;
+  }
+}
+function saveData() {
+  localStorage.setItem('bolaoData', JSON.stringify({ users, guesses, results, locked }));
 }
 
-function renderPicksTable(){
-  const filter = document.getElementById('filterUser').value;
-  const allUsers = users.filter(u=>u.name!=='admin' && u.name!==currentUser);
-  const displayedUsers = filter==='all' ? allUsers : allUsers.filter(u=>u.name===filter);
-  let html = '';
-  games.forEach(g=>{
-    const myPick = picks[currentUser] && picks[currentUser][g.id] ? picks[currentUser][g.id] : {gols1:'',gols2:''};
-    html += `<div class="game-row">
-      <div class="teams">${g.team1} x ${g.team2}</div>
-      <div class="my-pick">
-        <input type="number" id="my_${g.id}_1" value="${myPick.gols1}" placeholder="0" onchange="saveMyPick('${g.id}',1)">
-        <span>x</span>
-        <input type="number" id="my_${g.id}_2" value="${myPick.gols2}" placeholder="0" onchange="saveMyPick('${g.id}',2)">
-      </div>
-      <div class="others-scroll">
-        ${displayedUsers.map(u=>{
-          const up = picks[u.name] && picks[u.name][g.id] ? picks[u.name][g.id] : {gols1:'',gols2:''};
-          return `<div class="other-pick"><div>${u.name}</div><div>${up.gols1!==''?up.gols1:'-'}x${up.gols2!==''?up.gols2:'-'}</div></div>`;
-        }).join('')}
-      </div>
-    </div>`;
+// Funções auxiliares
+function getGuessesForMatch(matchId) {
+  let list = [];
+  for (let u of users) {
+    if (u.username === 'admin') continue;
+    if (guesses[u.username] && guesses[u.username][matchId]) {
+      list.push({ user: u.username, ...guesses[u.username][matchId] });
+    }
+  }
+  return list;
+}
+
+function computeScore(palpite, result) {
+  if (palpite === undefined || result === undefined) return null;
+  let pHome = parseInt(palpite.homeScore);
+  let pAway = parseInt(palpite.awayScore);
+  let rHome = parseInt(result.homeScore);
+  let rAway = parseInt(result.awayScore);
+  if (isNaN(pHome) || isNaN(pAway) || isNaN(rHome) || isNaN(rAway)) return null;
+  if (pHome === rHome && pAway === rAway) return 3;
+  let pResult = pHome > pAway ? 'H' : (pHome < pAway ? 'A' : 'D');
+  let rResult = rHome > rAway ? 'H' : (rHome < rAway ? 'A' : 'D');
+  if (pResult === rResult) return 1;
+  return 0;
+}
+
+function getUserScore(username) {
+  let total = 0;
+  for (let m of matches) {
+    const r = results[m.id];
+    const g = guesses[username] && guesses[username][m.id];
+    if (g && r) {
+      const s = computeScore(g, r);
+      if (s !== null) total += s;
+    }
+  }
+  return total;
+}
+
+// Renderização
+function renderRanking(containerId) {
+  const container = document.getElementById(containerId);
+  let ranking = users.filter(u => u.username !== 'admin').map(u => ({
+    username: u.username,
+    score: getUserScore(u.username)
+  }));
+  ranking.sort((a,b) => b.score - a.score);
+  let html = '<table><tr><th>Pos</th><th>Usuário</th><th>Pontos</th></tr>';
+  ranking.forEach((u,i) => {
+    html += `<tr><td>${i+1}</td><td>${u.username}</td><td>${u.score}</td></tr>`;
   });
-  document.getElementById('picksTable').innerHTML = html;
+  html += '</table>';
+  container.innerHTML = html;
 }
 
-function saveMyPick(gameId, side){
-  if(locked) {alert('Palpites bloqueados!'); render(); return;}
-  const input1 = document.getElementById(`my_${gameId}_1`);
-  const input2 = document.getElementById(`my_${gameId}_2`);
-  let val1 = input1.value.trim();
-  let val2 = input2.value.trim();
-  // Keep empty as empty, only if user typed 0 keep 0
-  if(val1 === '') val1 = '';
-  if(val2 === '') val2 = '';
-  if(!picks[currentUser]) picks[currentUser] = {};
-  picks[currentUser][gameId] = {gols1:val1, gols2:val2};
-  savePicks();
-}
-
-function resultsSection(){
-  if(currentUser !== 'admin'){
-    let html = '<div class="card"><h3>Resultados Oficiais</h3>';
-    games.forEach(g=>{
-      const r = results[g.id] || {gols1:'',gols2:''};
-      html += `<div class="game-row">
-        <div class="teams">${g.team1} x ${g.team2}</div>
-        <div>${r.gols1!==''?r.gols1:'-'} x ${r.gols2!==''?r.gols2:'-'}</div>
-      </div>`;
-    });
-    html += '</div>';
-    return html;
+function renderPublicGuesses() {
+  const filter = document.getElementById('publicFilter').value;
+  const container = document.getElementById('publicGuessesTable');
+  let html = '<div class="table-container"><table><tr><th>Jogo</th><th>Resultado Oficial</th>';
+  let usersList = users.filter(u => u.username !== 'admin').map(u => u.username);
+  if (filter === 'all') {
+    usersList.forEach(u => { html += '<th>'+u+'</th>'; });
   } else {
-    let html = '<div class="card"><h3>Inserir Resultados (Admin)</h3>';
-    games.forEach(g=>{
-      const r = results[g.id] || {gols1:'',gols2:''};
-      html += `<div class="game-row">
-        <div class="teams">${g.team1} x ${g.team2}</div>
-        <input type="number" id="res_${g.id}_1" value="${r.gols1}" placeholder="0" style="width:60px" onchange="saveResult('${g.id}',1)">
-        <span>x</span>
-        <input type="number" id="res_${g.id}_2" value="${r.gols2}" placeholder="0" style="width:60px" onchange="saveResult('${g.id}',2)">
-      </div>`;
-    });
-    html += '</div>';
-    return html;
+    html += '<th>'+filter+'</th>';
+  }
+  html += '</tr>';
+  matches.forEach(m => {
+    const r = results[m.id];
+    html += `<tr><td>${m.home} x ${m.away}</td><td>${r ? r.homeScore+'x'+r.awayScore : '-'}</td>`;
+    if (filter === 'all') {
+      usersList.forEach(u => {
+        const g = guesses[u] && guesses[u][m.id];
+        html += `<td>${g ? g.homeScore+'x'+g.awayScore : '-'}</td>`;
+      });
+    } else {
+      const g = guesses[filter] && guesses[filter][m.id];
+      html += `<td>${g ? g.homeScore+'x'+g.awayScore : '-'}</td>`;
+    }
+    html += '</tr>';
+  });
+  html += '</table></div>';
+  container.innerHTML = html;
+}
+
+function renderMyGuesses() {
+  if (!currentUser) return;
+  const container = document.getElementById('myGuessesSection');
+  let html = '<div class="table-container"><table><tr><th>Jogo</th><th>Seu Palpite</th></tr>';
+  matches.forEach(m => {
+    const g = guesses[currentUser] && guesses[currentUser][m.id];
+    html += `<tr><td>${m.home} x ${m.away}</td><td><input type="number" min="0" max="20" value="${g ? g.homeScore : ''}" id="myHome_${m.id}" style="width:50px;"> x <input type="number" min="0" max="20" value="${g ? g.awayScore : ''}" id="myAway_${m.id}" style="width:50px;"></td></tr>`;
+  });
+  html += '</table></div>';
+  container.innerHTML = html;
+}
+
+function renderOtherGuesses() {
+  if (!currentUser) return;
+  const filter = document.getElementById('otherFilter').value;
+  const container = document.getElementById('otherGuessesTable');
+  let html = '<div class="table-container"><table><tr><th>Jogo</th><th>Resultado Oficial</th>';
+  let usersList = users.filter(u => u.username !== 'admin' && u.username !== currentUser).map(u => u.username);
+  if (filter === 'all') {
+    usersList.forEach(u => { html += '<th>'+u+'</th>'; });
+  } else {
+    html += '<th>'+filter+'</th>';
+  }
+  html += '</tr>';
+  matches.forEach(m => {
+    const r = results[m.id];
+    html += `<tr><td>${m.home} x ${m.away}</td><td>${r ? r.homeScore+'x'+r.awayScore : '-'}</td>`;
+    if (filter === 'all') {
+      usersList.forEach(u => {
+        const g = guesses[u] && guesses[u][m.id];
+        html += `<td>${g ? g.homeScore+'x'+g.awayScore : '-'}</td>`;
+      });
+    } else {
+      const g = guesses[filter] && guesses[filter][m.id];
+      html += `<td>${g ? g.homeScore+'x'+g.awayScore : '-'}</td>`;
+    }
+    html += '</tr>';
+  });
+  html += '</table></div>';
+  container.innerHTML = html;
+}
+
+function renderResults() {
+  if (!currentUser) return;
+  const container = document.getElementById('resultsTable');
+  let html = '<div class="table-container"><table><tr><th>Jogo</th><th>Resultado Oficial</th><th>Seu Palpite</th><th>Pontos</th></tr>';
+  matches.forEach(m => {
+    const r = results[m.id];
+    const g = guesses[currentUser] && guesses[currentUser][m.id];
+    const score = computeScore(g, r);
+    html += `<tr><td>${m.home} x ${m.away}</td><td>${r ? r.homeScore+'x'+r.awayScore : '-'}</td><td>${g ? g.homeScore+'x'+g.awayScore : '-'}</td><td>${score !== null ? score : '-'}</td></tr>`;
+  });
+  html += '</table></div>';
+  container.innerHTML = html;
+}
+
+function refreshAll() {
+  renderRanking('rankingTable');
+  renderRanking('userRankingTable');
+  renderPublicGuesses();
+  renderMyGuesses();
+  renderOtherGuesses();
+  renderResults();
+  updatePublicFilterDropdown();
+  updateOtherFilterDropdown();
+  renderUserList();
+  renderAdminResultsInput();
+}
+
+function updatePublicFilterDropdown() {
+  const sel = document.getElementById('publicFilter');
+  const oldVal = sel.value;
+  sel.innerHTML = '<option value="all">Ver todos</option>';
+  users.filter(u => u.username !== 'admin').forEach(u => {
+    sel.innerHTML += `<option value="${u.username}">${u.username}</option>`;
+  });
+  sel.value = oldVal;
+}
+
+function updateOtherFilterDropdown() {
+  const sel = document.getElementById('otherFilter');
+  const oldVal = sel.value;
+  sel.innerHTML = '<option value="all">Ver todos</option>';
+  users.filter(u => u.username !== 'admin' && u.username !== currentUser).forEach(u => {
+    sel.innerHTML += `<option value="${u.username}">${u.username}</option>`;
+  });
+  sel.value = oldVal;
+}
+
+function saveMyGuesses() {
+  if (locked) { alert('Palpites bloqueados pelo administrador.'); return; }
+  if (!currentUser) return;
+  matches.forEach(m => {
+    const homeVal = document.getElementById(`myHome_${m.id}`);
+    const awayVal = document.getElementById(`myAway_${m.id}`);
+    if (!guesses[currentUser]) guesses[currentUser] = {};
+    guesses[currentUser][m.id] = {
+      homeScore: homeVal.value === '' ? null : parseInt(homeVal.value),
+      awayScore: awayVal.value === '' ? null : parseInt(awayVal.value)
+    };
+  });
+  saveData();
+  alert('Palpites salvos!');
+  refreshAll();
+}
+
+// Login / Logout
+function login() {
+  const username = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value.trim();
+  const user = users.find(u => u.username === username && u.password === password);
+  if (!user) { alert('Usuário ou senha inválidos.'); return; }
+  currentUser = username;
+  isAdmin = user.isAdmin;
+  if (user.firstLogin) {
+    document.getElementById('changePasswordModal').style.display = 'flex';
+    return;
+  }
+  showUserArea();
+}
+
+function changePassword() {
+  const newPass = document.getElementById('newPass').value;
+  const confirm = document.getElementById('confirmPass').value;
+  if (newPass.length < 4) { document.getElementById('changePassError').textContent = 'Mínimo 4 caracteres'; return; }
+  if (newPass !== confirm) { document.getElementById('changePassError').textContent = 'Senhas não coincidem'; return; }
+  const user = users.find(u => u.username === currentUser);
+  if (user) {
+    user.password = newPass;
+    user.firstLogin = false;
+    saveData();
+    document.getElementById('changePasswordModal').style.display = 'none';
+    showUserArea();
   }
 }
 
-function saveResult(gameId, side){
-  const input1 = document.getElementById(`res_${gameId}_1`);
-  const input2 = document.getElementById(`res_${gameId}_2`);
-  let val1 = input1.value.trim();
-  let val2 = input2.value.trim();
-  if(val1 === '') val1 = '';
-  if(val2 === '') val2 = '';
-  results[gameId] = {gols1:val1, gols2:val2};
-  saveResults();
+function showUserArea() {
+  document.getElementById('headerRight').innerHTML = `<span>${currentUser}</span> <button onclick="logout()">Logout</button>`;
+  document.getElementById('mainContent').style.display = 'none';
+  if (isAdmin) {
+    document.getElementById('userArea').style.display = 'none';
+    document.getElementById('adminArea').style.display = 'block';
+  } else {
+    document.getElementById('userArea').style.display = 'block';
+    document.getElementById('adminArea').style.display = 'none';
+  }
+  refreshAll();
 }
 
-function adminSection(){
-  let html = `
-    <div class="card">
-      <h3>Cadastrar Usuário</h3>
-      <input type="text" id="newUserName" placeholder="Nome do usuário">
-      <button onclick="addUser()">Adicionar</button>
-      <p id="adminMsg" style="color:#e94560;margin-top:10px"></p>
-    </div>
-    <div class="card">
-      <h3>Usuários Cadastrados</h3>
-      <table class="ranking-table">
-        <tr><th>Nome</th><th>Ações</th></tr>
-        ${users.filter(u=>u.name!=='admin').map(u=>`
-          <tr>
-            <td>${u.name}</td>
-            <td>
-              <button onclick="deleteUser('${u.name}')" style="width:auto;padding:4px 10px;margin-right:5px">Deletar</button>
-              <button onclick="resetPassword('${u.name}')" style="width:auto;padding:4px 10px">Reset Senha</button>
-            </td>
-          </tr>
-        `).join('')}
-      </table>
-    </div>
-    <div class="card">
-      <h3>Bloqueio de Palpites</h3>
-      <label><input type="checkbox" id="lockCheck" ${locked?'checked':''} onchange="toggleLock()"> Bloquear palpites</label>
-    </div>
-  `;
-  return html;
-}
-
-function addUser(){
-  const name = document.getElementById('newUserName').value.trim();
-  if(!name) {document.getElementById('adminMsg').textContent='Nome inválido'; return;}
-  if(findUser(name)) {document.getElementById('adminMsg').textContent='Usuário já existe'; return;}
-  const pass = genRandomPassword();
-  users.push({name:name, password:pass, forceChangePassword:true});
-  saveUsers();
-  document.getElementById('adminMsg').textContent=`Usuário criado. Senha: ${pass}`;
-  render();
-}
-
-function deleteUser(name){
-  users = users.filter(u=>u.name!==name);
-  delete picks[name];
-  saveUsers(); savePicks();
-  render();
-}
-
-function resetPassword(name){
-  const user = findUser(name);
-  if(!user) return;
-  const newPass = genRandomPassword();
-  user.password = newPass;
-  user.forceChangePassword = true;
-  saveUsers();
-  alert(`Nova senha para ${name}: ${newPass}`);
-  render();
-}
-
-function toggleLock(){
-  locked = document.getElementById('lockCheck').checked;
-  saveLocked();
-}
-
-function logout(){
+function logout() {
   currentUser = null;
-  render();
+  isAdmin = false;
+  document.getElementById('headerRight').innerHTML = '<input type="text" id="loginUser" placeholder="Usuário"><input type="password" id="loginPass" placeholder="Senha"><button onclick="login()">Login</button>';
+  document.getElementById('mainContent').style.display = 'block';
+  document.getElementById('userArea').style.display = 'none';
+  document.getElementById('adminArea').style.display = 'none';
+  switchPublicTab('ranking');
+  refreshAll();
 }
 
-// ========== INIT ==========
-// Ensure admin exists
-if(!findUser('admin')){
-  users.push({name:'admin',password:'admin',forceChangePassword:false});
+// Tabs
+function switchPublicTab(tab) {
+  document.querySelectorAll('#publicTabs button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#mainContent .tab-content').forEach(c => c.classList.remove('active'));
+  if (tab === 'ranking') {
+    document.querySelector('#publicTabs button:nth-child(1)').classList.add('active');
+    document.getElementById('publicTabRanking').classList.add('active');
+  } else {
+    document.querySelector('#publicTabs button:nth-child(2)').classList.add('active');
+    document.getElementById('publicTabGuesses').classList.add('active');
+  }
 }
-// For testing, add a user if none
-if(users.filter(u=>u.name!=='admin').length===0){
-  users.push({name:'teste',password:'1234',forceChangePassword:true});
+
+function switchUserTab(tab) {
+  document.querySelectorAll('#userTabs button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#userArea .tab-content').forEach(c => c.classList.remove('active'));
+  if (tab === 'ranking') {
+    document.querySelector('#userTabs button:nth-child(1)').classList.add('active');
+    document.getElementById('userTabRanking').classList.add('active');
+  } else if (tab === 'myguesses') {
+    document.querySelector('#userTabs button:nth-child(2)').classList.add('active');
+    document.getElementById('userTabMyGuesses').classList.add('active');
+  } else {
+    document.querySelector('#userTabs button:nth-child(3)').classList.add('active');
+    document.getElementById('userTabResults').classList.add('active');
+  }
 }
-saveUsers();
-render();
+
+function switchAdminTab(tab) {
+  document.querySelectorAll('#adminTabs button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#adminArea .tab-content').forEach(c => c.classList.remove('active'));
+  if (tab === 'users') {
+    document.querySelector('#adminTabs button:nth-child(1)').classList.add('active');
+    document.getElementById('adminTabUsers').classList.add('active');
+  } else if (tab === 'matches') {
+    document.querySelector('#adminTabs button:nth-child(2)').classList.add('active');
+    document.getElementById('adminTabMatches').classList.add('active');
+  } else {
+    document.querySelector('#adminTabs button:nth-child(3)').classList.add('active');
+    document.getElementById('adminTabResults').classList.add('active');
+  }
+}
+
+// Admin functions
+function registerUser() {
+  const name = document.getElementById('newUserName').value.trim();
+  if (!name) { alert('Nome obrigatório'); return; }
+  if (users.find(u => u.username === name)) { alert('Usuário já existe'); return; }
+  const pass = Math.random().toString(36).slice(2,8);
+  users.push({ username: name, password: pass, firstLogin: true, isAdmin: false });
+  saveData();
+  alert(`Usuário ${name} cadastrado com senha: ${pass}`);
+  document.getElementById('newUserName').value = '';
+  refreshAll();
+}
+
+function deleteUser(username) {
+  if (username === 'admin') { alert('Não pode deletar admin'); return; }
+  users = users.filter(u => u.username !== username);
+  delete guesses[username];
+  saveData();
+  refreshAll();
+}
+
+function resetPassword(username) {
+  const user = users.find(u => u.username === username);
+  if (user) {
+    const pass = Math.random().toString(36).slice(2,8);
+    user.password = pass;
+    user.firstLogin = true;
+    saveData();
+    alert(`Nova senha para ${username}: ${pass}`);
+  }
+}
+
+function lockGuesses() {
+  locked = !locked;
+  document.getElementById('lockBtn').textContent = locked ? 'Desbloquear Palpites' : 'Bloquear Palpites';
+  saveData();
+}
+
+function resetAllPasswords() {
+  users.forEach(u => {
+    if (u.username !== 'admin') {
+      u.password = Math.random().toString(36).slice(2,8);
+      u.firstLogin = true;
+    }
+  });
+  saveData();
+  alert('Todas as senhas foram resetadas (exceto admin).');
+}
+
+function renderUserList() {
+  const container = document.getElementById('userList');
+  let html = '<table><tr><th>Usuário</th><th>Ações</th></tr>';
+  users.filter(u => u.username !== 'admin').forEach(u => {
+    html += `<tr><td>${u.username}</td><td>
+      <button onclick="deleteUser('${u.username}')">Deletar</button>
+      <button onclick="resetPassword('${u.username}')">Reset Senha</button>
+    </td></tr>`;
+  });
+  html += '</table>';
+  container.innerHTML = html;
+}
+
+function renderAdminResultsInput() {
+  const container = document.getElementById('adminResultsInput');
+  let html = '<table><tr><th>Jogo</th><th>Resultado Oficial</th></tr>';
+  matches.forEach(m => {
+    const r = results[m.id];
+    html += `<tr><td>${m.home} x ${m.away}</td><td>
+      <input type="number" min="0" max="20" value="${r ? r.homeScore : ''}" id="resHome_${m.id}" style="width:50px;"> x
+      <input type="number" min="0" max="20" value="${r ? r.awayScore : ''}" id="resAway_${m.id}" style="width:50px;">
+      <button onclick="saveResult(${m.id})">Salvar</button>
+    </td></tr>`;
+  });
+  html += '</table>';
+  container.innerHTML = html;
+}
+
+function saveResult(matchId) {
+  const home = document.getElementById(`resHome_${matchId}`).value;
+  const away = document.getElementById(`resAway_${matchId}`).value;
+  if (home === '' || away === '') {
+    results[matchId] = null;
+  } else {
+    results[matchId] = { homeScore: parseInt(home), awayScore: parseInt(away) };
+  }
+  saveData();
+  refreshAll();
+  alert('Resultado salvo!');
+}
+
+// Inicialização
+loadData();
+refreshAll();
 </script>
 </body>
 </html>
