@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bolão Copa do Mundo 2022</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a2e; color: #eee; padding: 20px; }
+.container { max-width: 1200px; margin: auto; }
+h1 { text-align: center; margin-bottom: 20px; color: #f39c12; }
+.tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+.tab-btn { padding: 10px 30px; background: #16213e; color: #eee; border: 1px solid #0f3460; cursor: pointer; border-radius: 5px; font-size: 16px; transition: 0.3s; }
+.tab-btn.active { background: #0f3460; border-color: #e94560; color: #e94560; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.form-group { margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+input, select { padding: 8px; border: 1px solid #0f3460; background: #16213e; color: #eee; border-radius: 4px; }
+button { padding: 8px 16px; background: #e94560; color: #fff; border: none; border-radius: 4px; cursor: pointer; transition: 0.3s; }
+button:hover { background: #c23152; }
+.match-card { background: #16213e; border: 1px solid #0f3460; border-radius: 8px; padding: 15px; margin-bottom: 10px; }
+.match-card h3 { margin-bottom: 10px; color: #f39c12; }
+.match-card .teams { display: flex; gap: 20px; align-items: center; justify-content: space-between; }
+.match-card .scores input { width: 50px; text-align: center; }
+.ranking-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+.ranking-table th, .ranking-table td { padding: 10px; text-align: left; border-bottom: 1px solid #0f3460; }
+.ranking-table th { background: #0f3460; color: #e94560; }
+@media (max-width: 600px) { .match-card .teams { flex-direction: column; gap: 10px; } }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>⚽ Bolão Copa do Mundo 2022</h1>
+<div class="tabs">
+<button class="tab-btn active" data-tab="palpites">Meus Palpites</button>
+<button class="tab-btn" data-tab="resultados">Resultados</button>
+</div>
+<div id="palpites" class="tab-content active">
+<div class="form-group">
+<label for="player-select">Jogador:</label>
+<select id="player-select"><option value="">Selecione um jogador</option></select>
+</div>
+<div class="form-group">
+<input type="text" id="new-player" placeholder="Nome do novo jogador">
+<button id="add-player-btn">Adicionar Jogador</button>
+</div>
+<div id="matches-container"></div>
+</div>
+<div id="resultados" class="tab-content">
+<h2>Resultados e Ranking</h2>
+<div id="results-container"></div>
+<div id="ranking-container"></div>
+</div>
+</div>
+<script>
+// Data: groups and teams
+const groups = [
+{ name: 'Grupo A', teams: ['Holanda', 'Senegal', 'Catar', 'Equador'] },
+{ name: 'Grupo B', teams: ['Inglaterra', 'País de Gales', 'Irã', 'EUA'] },
+{ name: 'Grupo C', teams: ['Argentina', 'Polônia', 'México', 'Arábia Saudita'] },
+{ name: 'Grupo D', teams: ['França', 'Dinamarca', 'Tunísia', 'Austrália'] },
+{ name: 'Grupo E', teams: ['Espanha', 'Alemanha', 'Japão', 'Costa Rica'] },
+{ name: 'Grupo F', teams: ['Bélgica', 'Marrocos', 'Croácia', 'Canadá'] },
+{ name: 'Grupo G', teams: ['Brasil', 'Suíça', 'Camarões', 'Sérvia'] },
+{ name: 'Grupo H', teams: ['Portugal', 'Uruguai', 'Gana', 'Coreia do Sul'] }
+];
+
+// Generate matches (round-robin per group)
+let matchId = 1;
+const matches = [];
+groups.forEach(group => {
+const teams = group.teams;
+for (let i = 0; i < teams.length; i++) {
+for (let j = i + 1; j < teams.length; j++) {
+matches.push({
+id: matchId++,
+home: teams[i],
+away: teams[j],
+group: group.name
+});
+}
+}
+});
+
+// LocalStorage keys
+const LS_PLAYERS = 'bolaocopa_players';
+const LS_GUESSES = 'bolaocopa_guesses';
+const LS_RESULTS = 'bolaocopa_results';
+
+// Default data
+let players = JSON.parse(localStorage.getItem(LS_PLAYERS)) || ['Admin'];
+let guesses = JSON.parse(localStorage.getItem(LS_GUESSES)) || {};
+let results = JSON.parse(localStorage.getItem(LS_RESULTS)) || {};
+
+function saveData() {
+localStorage.setItem(LS_PLAYERS, JSON.stringify(players));
+localStorage.setItem(LS_GUESSES, JSON.stringify(guesses));
+localStorage.setItem(LS_RESULTS, JSON.stringify(results));
+}
+
+function init() {
+populatePlayerSelect();
+renderMatches();
+renderResults();
+renderRanking();
+}
+
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+btn.addEventListener('click', function() {
+document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+this.classList.add('active');
+document.getElementById(this.dataset.tab).classList.add('active');
+if (this.dataset.tab === 'resultados') {
+renderResults();
+renderRanking();
+}
+});
+});
+
+// Player management
+function populatePlayerSelect() {
+const select = document.getElementById('player-select');
+select.innerHTML = '<option value="">Selecione um jogador</option>';
+players.forEach(p => {
+const opt = document.createElement('option');
+opt.value = p;
+opt.textContent = p;
+select.appendChild(opt);
+});
+// select current player if exist
+const current = select.value;
+if (!current && players.length > 0) {
+select.value = players[0];
+}
+renderMatches();
+}
+
+document.getElementById('add-player-btn').addEventListener('click', function() {
+const input = document.getElementById('new-player');
+const name = input.value.trim();
+if (name && !players.includes(name)) {
+players.push(name);
+guesses[name] = {};
+saveData();
+populatePlayerSelect();
+input.value = '';
+}
+});
+
+// Render matches for selected player
+function renderMatches() {
+const container = document.getElementById('matches-container');
+const player = document.getElementById('player-select').value;
+if (!player) {
+container.innerHTML = '<p>Selecione ou adicione um jogador.</p>';
+return;
+}
+if (!guesses[player]) guesses[player] = {};
+let html = '';
+let currentGroup = '';
+matches.forEach(match => {
+if (match.group !== currentGroup) {
+currentGroup = match.group;
+html += `<h2>${match.group}</h2>`;
+}
+const guess = guesses[player][match.id] || { homeScore: '', awayScore: '' };
+html += `
+<div class="match-card">
+<div class="teams">
+<span>${match.home}</span>
+<div class="scores">
+<input type="number" min="0" max="99" class="home-score" data-match-id="${match.id}" value="${guess.homeScore}" placeholder="0">
+<span> x </span>
+<input type="number" min="0" max="99" class="away-score" data-match-id="${match.id}" value="${guess.awayScore}" placeholder="0">
+</div>
+<span>${match.away}</span>
+</div>
+</div>`;
+});
+container.innerHTML = html;
+
+// Add event listeners to inputs
+container.querySelectorAll('.home-score, .away-score').forEach(input => {
+input.addEventListener('change', function() {
+const matchId = parseInt(this.dataset.matchId);
+const player = document.getElementById('player-select').value;
+if (!player) return;
+const homeInput = container.querySelector(`.home-score[data-match-id="${matchId}"]`);
+const awayInput = container.querySelector(`.away-score[data-match-id="${matchId}"]`);
+const homeScore = homeInput.value === '' ? null : parseInt(homeInput.value);
+const awayScore = awayInput.value === '' ? null : parseInt(awayInput.value);
+guesses[player][matchId] = { homeScore, awayScore };
+saveData();
+});
+});
+}
+
+// Render results (admin sets actual scores)
+function renderResults() {
+const container = document.getElementById('results-container');
+let html = '<h3>Resultados Oficiais</h3>';
+matches.forEach(match => {
+const result = results[match.id] || { homeScore: '', awayScore: '' };
+html += `
+<div class="match-card">
+<div class="teams">
+<span>${match.home}</span>
+<div class="scores">
+<input type="number" min="0" max="99" class="result-home" data-match-id="${match.id}" value="${result.homeScore}" placeholder="-">
+<span> x </span>
+<input type="number" min="0" max="99" class="result-away" data-match-id="${match.id}" value="${result.awayScore}" placeholder="-">
+</div>
+<span>${match.away}</span>
+</div>
+</div>`;
+});
+html += '<button id="save-results">Salvar Resultados</button>';
+container.innerHTML = html;
+
+document.getElementById('save-results').addEventListener('click', function() {
+container.querySelectorAll('.result-home').forEach(input => {
+const id = parseInt(input.dataset.matchId);
+const home = input.value === '' ? null : parseInt(input.value);
+const away = container.querySelector(`.result-away[data-match-id="${id}"]`).value;
+results[id] = { homeScore: home, awayScore: away === '' ? null : parseInt(away) };
+});
+saveData();
+renderRanking();
+});
+}
+
+// Calculate points
+function calculatePoints(guess, result) {
+if (guess.homeScore === null || guess.awayScore === null || result.homeScore === null || result.awayScore === null) return 0;
+if (guess.homeScore === result.homeScore && guess.awayScore === result.awayScore) return 3;
+const guessResult = Math.sign(guess.homeScore - guess.awayScore);
+const actualResult = Math.sign(result.homeScore - result.awayScore);
+if (guessResult === actualResult) return 1;
+return 0;
+}
+
+function renderRanking() {
+const container = document.getElementById('ranking-container');
+let ranking = players.map(player => {
+let totalPoints = 0;
+let correctExact = 0;
+let correctOutcome = 0;
+matches.forEach(match => {
+const result = results[match.id];
+if (!result || result.homeScore === null || result.awayScore === null) return;
+const guess = guesses[player] && guesses[player][match.id];
+if (!guess || guess.homeScore === null || guess.awayScore === null) return;
+const pts = calculatePoints(guess, result);
+totalPoints += pts;
+if (pts === 3) correctExact++;
+else if (pts === 1) correctOutcome++;
+});
+return { name: player, points: totalPoints, exact: correctExact, outcome: correctOutcome };
+});
+ranking.sort((a,b) => b.points - a.points);
+let html = '<h3>Ranking</h3><table class="ranking-table"><tr><th>#</th><th>Jogador</th><th>Pontos</th><th>Placar Exato</th><th>Resultado</th></tr>';
+ranking.forEach((p, i) => {
+html += `<tr><td>${i+1}</td><td>${p.name}</td><td>${p.points}</td><td>${p.exact}</td><td>${p.outcome}</td></tr>`;
+});
+html += '</table>';
+container.innerHTML = html;
+}
+
+// Event listener for player select change
+document.getElementById('player-select').addEventListener('change', renderMatches);
+
+init();
+</script>
+</body>
+</html>
