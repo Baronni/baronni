@@ -1,361 +1,626 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bolão Copa do Mundo</title>
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: #1a1a2e; color: #eee; font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
-.container { background: #16213e; border-radius: 16px; padding: 30px; width: 100%; max-width: 1200px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-h1, h2, h3 { color: #e94560; margin-bottom: 20px; }
-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-th, td { padding: 10px; text-align: left; border-bottom: 1px solid #0f3460; }
-th { background: #0f3460; color: #e94560; }
-input, select, button { padding: 10px; border: none; border-radius: 8px; margin: 5px; font-size: 14px; }
-input, select { background: #1a1a2e; color: #eee; border: 1px solid #0f3460; width: 100%; }
-button { background: #e94560; color: white; cursor: pointer; font-weight: bold; transition: 0.3s; }
-button:hover { background: #c73450; transform: scale(1.02); }
-.btn-secondary { background: #0f3460; }
-.btn-secondary:hover { background: #1a4a8a; }
-.btn-danger { background: #b00; }
-.btn-danger:hover { background: #900; }
-.btn-success { background: #2ecc71; }
-.btn-success:hover { background: #27ae60; }
-.tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-.tab { padding: 10px 20px; background: #0f3460; cursor: pointer; border-radius: 8px; font-weight: bold; }
-.tab.active { background: #e94560; }
-.section { display: none; }
-.section.active { display: block; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
-.card { background: #1a1a2e; padding: 15px; border-radius: 8px; border: 1px solid #0f3460; }
-.lock-indicator { color: #e94560; font-weight: bold; margin: 10px 0; }
-.locked { opacity: 0.5; pointer-events: none; }
-.alert { padding: 10px; background: #e94560; border-radius: 8px; margin: 10px 0; }
-@media (max-width: 768px) { .container { padding: 15px; }; .grid { grid-template-columns: 1fr; } }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bolão Copa do Mundo 2022</title>
+    <style>
+        /* Dark theme and responsive design */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+        }
+        h1, h2, h3 {
+            color: #ffffff;
+        }
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab-button {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            color: #ccc;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.2s;
+        }
+        .tab-button.active {
+            background: #2c2c2c;
+            border-color: #66bb6a;
+            color: #66bb6a;
+        }
+        .tab-content {
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #333;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background: #333;
+            color: #fff;
+        }
+        tr:nth-child(even) {
+            background: #2a2a2a;
+        }
+        input, select, textarea {
+            background: #2c2c2c;
+            border: 1px solid #444;
+            color: #e0e0e0;
+            padding: 8px;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 400px;
+        }
+        button {
+            background: #66bb6a;
+            color: #121212;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #4caf50;
+        }
+        .btn-danger {
+            background: #ef5350;
+        }
+        .btn-danger:hover {
+            background: #e53935;
+        }
+        .btn-secondary {
+            background: #555;
+        }
+        .btn-secondary:hover {
+            background: #777;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .game-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .game-row input {
+            width: 60px;
+            text-align: center;
+        }
+        .game-row span {
+            min-width: 30px;
+            text-align: center;
+        }
+        .blocked-banner {
+            background: #ff9800;
+            color: #121212;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .login-form {
+            max-width: 400px;
+            margin: 50px auto;
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 8px;
+        }
+        .login-form input {
+            margin-bottom: 15px;
+        }
+        .login-form button {
+            width: 100%;
+        }
+        .admin-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .admin-panel {
+                grid-template-columns: 1fr;
+            }
+            .game-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .tabs {
+                flex-direction: column;
+            }
+        }
+        .user-list {
+            margin-top: 20px;
+        }
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #333;
+        }
+        .user-item button {
+            margin-left: 10px;
+        }
+        .other-palpites {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-<div class="container" id="app">
-  <!-- Login Section -->
-  <div id="loginSection">
-    <h1>Bolão Copa do Mundo 2022</h1>
-    <h2>Login</h2>
-    <input type="text" id="loginUser" placeholder="Usuário">
-    <input type="password" id="loginPass" placeholder="Senha">
-    <button id="btnLogin" class="btn-success">Entrar</button>
-    <button id="btnAdminLogin" class="btn-secondary">Acesso ADM</button>
-    <div id="loginError" class="alert" style="display:none;"></div>
-  </div>
+    <div class="container" id="app">
+        <!-- Header -->
+        <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 20px;">
+            <h1>Bolão Copa do Mundo 2022</h1>
+            <div id="user-info">
+                <span id="user-name"></span>
+                <button id="btn-logout" class="hidden btn-secondary" onclick="logout()">Logout</button>
+            </div>
+        </header>
 
-  <!-- Admin Section -->
-  <div id="adminSection" style="display:none;">
-    <h1>Painel Administrativo</h1>
-    <button id="btnLogoutAdmin" class="btn-danger" style="float:right;">Logout</button>
-    <h2>Gerenciar Usuários</h2>
-    <div>
-      <input type="text" id="newUserName" placeholder="Nome do usuário">
-      <input type="password" id="newUserPass" placeholder="Senha (deixe em branco para aleatória)">
-      <button id="btnAddUser" class="btn-success">Cadastrar</button>
+        <!-- Login Section (visible when not logged in) -->
+        <div id="login-section">
+            <div class="login-form">
+                <h2>Login</h2>
+                <div class="form-group">
+                    <label for="login-user">Usuário</label>
+                    <input type="text" id="login-user" placeholder="Nome de usuário">
+                </div>
+                <div class="form-group">
+                    <label for="login-pass">Senha</label>
+                    <input type="password" id="login-pass" placeholder="Senha">
+                </div>
+                <button onclick="login()">Entrar</button>
+                <p style="margin-top: 15px; color: #aaa;">ADM: usuário "ADM", senha "admin"</p>
+            </div>
+            <!-- Ranking on home page without login -->
+            <div class="tab-content">
+                <h2>Ranking</h2>
+                <div id="ranking-table"></div>
+            </div>
+        </div>
+
+        <!-- User Panel (logged in) -->
+        <div id="user-panel" class="hidden">
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-button active" onclick="openTab('ranking')">Ranking</button>
+                <button class="tab-button" onclick="openTab('my-palpites')">Meus Palpites</button>
+                <button class="tab-button" onclick="openTab('resultados')">Resultados</button>
+            </div>
+
+            <!-- Tab Content: Ranking -->
+            <div id="tab-ranking" class="tab-content">
+                <h2>Ranking</h2>
+                <div id="ranking-table-user"></div>
+            </div>
+
+            <!-- Tab Content: Meus Palpites -->
+            <div id="tab-my-palpites" class="tab-content hidden">
+                <h2>Meus Palpites</h2>
+                <div id="blocked-banner" class="hidden blocked-banner">Palpites bloqueados pelo administrador.</div>
+                <form id="palpite-form">
+                    <div id="games-container"></div>
+                    <button type="submit" id="btn-save-palpites" onclick="savePalpites(event)">Salvar Palpites</button>
+                </form>
+                <!-- Other players' palpites -->
+                <div class="other-palpites">
+                    <h3>Palpites de Outros Jogadores</h3>
+                    <div id="other-palpites-table"></div>
+                </div>
+            </div>
+
+            <!-- Tab Content: Resultados -->
+            <div id="tab-resultados" class="tab-content hidden">
+                <h2>Resultados Oficiais</h2>
+                <div id="resultados-table"></div>
+            </div>
+        </div>
+
+        <!-- Admin Panel (visible only to ADM) -->
+        <div id="admin-panel" class="hidden">
+            <h2>Painel do Administrador</h2>
+            <div class="admin-panel">
+                <div>
+                    <h3>Cadastrar Novo Usuário</h3>
+                    <div class="form-group">
+                        <label for="new-user-name">Nome</label>
+                        <input type="text" id="new-user-name" placeholder="Nome do usuário">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-user-pass">Senha (deixe em branco para aleatória)</label>
+                        <input type="text" id="new-user-pass" placeholder="Senha">
+                    </div>
+                    <button onclick="addUser()">Cadastrar</button>
+                </div>
+                <div>
+                    <h3>Gerenciar Usuários</h3>
+                    <div id="user-list"></div>
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label for="block-palpites">Bloquear Palpites</label>
+                        <input type="checkbox" id="block-palpites" onchange="toggleBlock()"> Desabilitar edição de palpites
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 30px;">
+                <h3>Inserir Resultados Oficiais</h3>
+                <div id="admin-resultados"></div>
+                <button onclick="saveOfficialResults()" style="margin-top: 10px;">Salvar Resultados</button>
+            </div>
+        </div>
     </div>
-    <table id="userTable">
-      <thead><tr><th>Nome</th><th>Ações</th></tr></thead>
-      <tbody id="userList"></tbody>
-    </table>
-    <h2>Resultados dos Jogos</h2>
-    <div id="resultsContainer"></div>
-    <h2>Bloqueio de Palpites</h2>
-    <label><input type="checkbox" id="lockPicksToggle"> Bloquear edição de palpites</label>
-  </div>
 
-  <!-- User Section -->
-  <div id="userSection" style="display:none;">
-    <h1>Bem-vindo, <span id="userNameDisplay"></span></h1>
-    <div class="tabs">
-      <div class="tab active" data-tab="picks">Meus Palpites</div>
-      <div class="tab" data-tab="results">Resultados</div>
-      <div class="tab" data-tab="ranking">Ranking</div>
-      <div style="flex-grow:1;"></div>
-      <button id="btnLogoutUser" class="btn-danger">Logout</button>
-    </div>
-    <div class="section active" id="tabPicks">
-      <div class="lock-indicator" id="lockStatus">Palpites estão desbloqueados</div>
-      <div id="picksContainer"></div>
-      <button id="btnSavePicks" class="btn-success">Salvar Palpites</button>
-    </div>
-    <div class="section" id="tabResults">
-      <div id="resultsView"></div>
-    </div>
-    <div class="section" id="tabRanking">
-      <table id="rankingTable">
-        <thead><tr><th>Posição</th><th>Nome</th><th>Pontos</th><th>Placares Exatos</th></tr></thead>
-        <tbody id="rankingBody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
+    <script>
+        // ========== DATA ==========
+        const groups = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        const teams = {
+            'A': ['Holanda', 'Senegal', 'Catar', 'Equador'],
+            'B': ['Inglaterra', 'País de Gales', 'Irã', 'EUA'],
+            'C': ['Argentina', 'Polônia', 'México', 'Arábia Saudita'],
+            'D': ['França', 'Dinamarca', 'Tunísia', 'Austrália'],
+            'E': ['Espanha', 'Alemanha', 'Japão', 'Costa Rica'],
+            'F': ['Bélgica', 'Marrocos', 'Croácia', 'Canadá'],
+            'G': ['Brasil', 'Suíça', 'Camarões', 'Sérvia'],
+            'H': ['Portugal', 'Uruguai', 'Gana', 'Coreia do Sul']
+        };
+        // Generate 48 matches (each group: 6 matches)
+        let matches = [];
+        groups.forEach(group => {
+            const t = teams[group];
+            for (let i = 0; i < t.length; i++) {
+                for (let j = i + 1; j < t.length; j++) {
+                    matches.push({
+                        id: `match_${group}_${t[i]}_${t[j]}`,
+                        group: group,
+                        home: t[i],
+                        away: t[j]
+                    });
+                }
+            }
+        });
 
-<script>
-// Data
-const groups = [
-  {name:'A', teams:['Holanda','Senegal','Catar','Equador']},
-  {name:'B', teams:['Inglaterra','País de Gales','Irã','EUA']},
-  {name:'C', teams:['Argentina','Polônia','México','Arábia Saudita']},
-  {name:'D', teams:['França','Dinamarca','Tunísia','Austrália']},
-  {name:'E', teams:['Espanha','Alemanha','Japão','Costa Rica']},
-  {name:'F', teams:['Bélgica','Marrocos','Croácia','Canadá']},
-  {name:'G', teams:['Brasil','Suíça','Camarões','Sérvia']},
-  {name:'H', teams:['Portugal','Uruguai','Gana','Coreia do Sul']}
-];
+        // ========== STATE ==========
+        let currentUser = null;
+        let users = JSON.parse(localStorage.getItem('bolao_users')) || [];
+        let palpites = JSON.parse(localStorage.getItem('bolao_palpites')) || {};
+        let officialResults = JSON.parse(localStorage.getItem('bolao_results')) || {};
+        let palpitesBlocked = localStorage.getItem('bolao_blocked') === 'true';
 
-// Generate matches
-let matches = [];
-groups.forEach(group => {
-  const t = group.teams;
-  for (let i=0; i<4; i++) {
-    for (let j=i+1; j<4; j++) {
-      matches.push({id: matches.length+1, group: group.name, home: t[i], away: t[j], homeGoals: '', awayGoals: ''});
-    }
-  }
-});
-
-// LocalStorage helpers
-function getUsers() { return JSON.parse(localStorage.getItem('users') || '[]'); }
-function saveUsers(users) { localStorage.setItem('users', JSON.stringify(users)); }
-function getUser(user) { const users = getUsers(); return users.find(u => u.username === user); }
-function getPicks(username) { return JSON.parse(localStorage.getItem('picks_'+username) || '{}'); }
-function savePicks(username, picks) { localStorage.setItem('picks_'+username, JSON.stringify(picks)); }
-function getResults() { return JSON.parse(localStorage.getItem('results') || '{}'); }
-function saveResults(results) { localStorage.setItem('results', JSON.stringify(results)); }
-function isLocked() { return localStorage.getItem('lockPicks') === 'true'; }
-function setLocked(val) { localStorage.setItem('lockPicks', val); }
-
-// Initialize default admin if not exists
-if (!localStorage.getItem('users')) {
-  saveUsers([{username:'ADM', password:'admin', role:'admin'}]);
-}
-
-// Global state
-let currentUser = null;
-let currentRole = null;
-
-// DOM elements
-const loginSection = document.getElementById('loginSection');
-const adminSection = document.getElementById('adminSection');
-const userSection = document.getElementById('userSection');
-const loginUser = document.getElementById('loginUser');
-const loginPass = document.getElementById('loginPass');
-const btnLogin = document.getElementById('btnLogin');
-const btnAdminLogin = document.getElementById('btnAdminLogin');
-const loginError = document.getElementById('loginError');
-const btnLogoutAdmin = document.getElementById('btnLogoutAdmin');
-const btnLogoutUser = document.getElementById('btnLogoutUser');
-const userNameDisplay = document.getElementById('userNameDisplay');
-const userList = document.getElementById('userList');
-const newUserName = document.getElementById('newUserName');
-const newUserPass = document.getElementById('newUserPass');
-const btnAddUser = document.getElementById('btnAddUser');
-const lockPicksToggle = document.getElementById('lockPicksToggle');
-const resultsContainer = document.getElementById('resultsContainer');
-const picksContainer = document.getElementById('picksContainer');
-const resultsView = document.getElementById('resultsView');
-const rankingBody = document.getElementById('rankingBody');
-const lockStatus = document.getElementById('lockStatus');
-const btnSavePicks = document.getElementById('btnSavePicks');
-const tabs = document.querySelectorAll('.tab');
-const sections = document.querySelectorAll('.section');
-
-// Tab switching
-tabs.forEach(tab => {
-  tab.addEventListener('click', function() {
-    tabs.forEach(t => t.classList.remove('active'));
-    sections.forEach(s => s.classList.remove('active'));
-    this.classList.add('active');
-    document.getElementById('tab'+this.dataset.tab.charAt(0).toUpperCase()+this.dataset.tab.slice(1)).classList.add('active');
-    if (this.dataset.tab === 'ranking') updateRanking();
-    if (this.dataset.tab === 'results') displayResults();
-  });
-});
-
-// Login functions
-function doLogin(username, password) {
-  const users = getUsers();
-  const user = users.find(u => u.username === username && u.password === password);
-  if (user) {
-    currentUser = username;
-    currentRole = user.role;
-    loginSection.style.display = 'none';
-    if (user.role === 'admin') {
-      adminSection.style.display = 'block';
-      loadAdminPanel();
-    } else {
-      userSection.style.display = 'block';
-      userNameDisplay.textContent = username;
-      loadUserPanel();
-    }
-    loginError.style.display = 'none';
-    loginUser.value = '';
-    loginPass.value = '';
-  } else {
-    loginError.textContent = 'Usuário ou senha inválidos';
-    loginError.style.display = 'block';
-  }
-}
-
-btnLogin.addEventListener('click', () => doLogin(loginUser.value, loginPass.value));
-btnAdminLogin.addEventListener('click', () => doLogin('ADM', loginPass.value || 'admin'));
-
-// Logout
-function logout() {
-  currentUser = null;
-  currentRole = null;
-  adminSection.style.display = 'none';
-  userSection.style.display = 'none';
-  loginSection.style.display = 'block';
-  lockPicksToggle.checked = isLocked();
-}
-
-btnLogoutAdmin.addEventListener('click', logout);
-btnLogoutUser.addEventListener('click', logout);
-
-// Admin panel
-function loadAdminPanel() {
-  updateUserTable();
-  updateResultsForm();
-  lockPicksToggle.checked = isLocked();
-}
-
-function updateUserTable() {
-  const users = getUsers();
-  userList.innerHTML = users.filter(u => u.role !== 'admin').map(u => `<tr><td>${u.username}</td><td><button class="btn-danger btn-sm" onclick="deleteUser('${u.username}')">Deletar</button></td></tr>`).join('');
-}
-
-window.deleteUser = function(username) {
-  if (confirm('Deletar usuário '+username+'?')) {
-    let users = getUsers();
-    users = users.filter(u => u.username !== username);
-    saveUsers(users);
-    localStorage.removeItem('picks_'+username);
-    updateUserTable();
-  }
-}
-
-btnAddUser.addEventListener('click', function() {
-  const name = newUserName.value.trim();
-  if (!name) { alert('Nome é obrigatório'); return; }
-  let pass = newUserPass.value.trim();
-  if (!pass) {
-    // Generate random 8-char password
-    pass = Math.random().toString(36).slice(-8);
-  }
-  let users = getUsers();
-  if (users.find(u => u.username === name)) { alert('Usuário já existe'); return; }
-  users.push({username: name, password: pass, role: 'user'});
-  saveUsers(users);
-  alert('Usuário cadastrado. Senha: '+pass);
-  newUserName.value = '';
-  newUserPass.value = '';
-  updateUserTable();
-});
-
-function updateResultsForm() {
-  const results = getResults();
-  resultsContainer.innerHTML = `<table><thead><tr><th>Jogo</th><th>Placar</th></tr></thead><tbody>${matches.map(m => `<tr><td>${m.id}. ${m.home} x ${m.away}</td><td><input type="number" min="0" class="result-home" data-match="${m.id}" value="${results[m.id]?.homeGoals || ''}"> x <input type="number" min="0" class="result-away" data-match="${m.id}" value="${results[m.id]?.awayGoals || ''}"></td></tr>`).join('')}</tbody></table>`;
-  document.querySelectorAll('.result-home, .result-away').forEach(input => {
-    input.addEventListener('change', function() {
-      const matchId = parseInt(this.dataset.match);
-      const home = document.querySelector(`.result-home[data-match="${matchId}"]`).value;
-      const away = document.querySelector(`.result-away[data-match="${matchId}"]`).value;
-      let results = getResults();
-      if (home === '' && away === '') {
-        delete results[matchId];
-      } else {
-        results[matchId] = { homeGoals: parseInt(home) || 0, awayGoals: parseInt(away) || 0 };
-      }
-      saveResults(results);
-    });
-  });
-}
-
-lockPicksToggle.addEventListener('change', function() {
-  setLocked(this.checked);
-  if (currentRole === 'user') updateLockStatus();
-});
-
-// User panel
-function loadUserPanel() {
-  updatePicksForm();
-  displayResults();
-  updateLockStatus();
-}
-
-function updateLockStatus() {
-  const locked = isLocked();
-  lockStatus.textContent = locked ? 'Palpites estão bloqueados (apenas visualização)' : 'Palpites estão desbloqueados';
-  lockStatus.style.color = locked ? '#e94560' : '#2ecc71';
-  if (currentRole === 'user') {
-    const inputs = document.querySelectorAll('#picksContainer input');
-    inputs.forEach(inp => inp.disabled = locked);
-    btnSavePicks.disabled = locked;
-  }
-}
-
-function updatePicksForm() {
-  const picks = getPicks(currentUser);
-  picksContainer.innerHTML = `<table><thead><tr><th>Jogo</th><th>Palpite</th></tr></thead><tbody>${matches.map(m => `<tr><td>${m.id}. ${m.home} x ${m.away}</td><td><input type="number" min="0" class="pick-home" data-match="${m.id}" value="${picks[m.id]?.homeGoals || ''}"> x <input type="number" min="0" class="pick-away" data-match="${m.id}" value="${picks[m.id]?.awayGoals || ''}"></td></tr>`).join('')}</tbody></table>`;
-  updateLockStatus();
-}
-
-btnSavePicks.addEventListener('click', function() {
-  const picks = {};
-  document.querySelectorAll('.pick-home').forEach(inp => {
-    const matchId = parseInt(inp.dataset.match);
-    const home = inp.value;
-    const away = document.querySelector(`.pick-away[data-match="${matchId}"]`).value;
-    if (home === '' && away === '') {
-      delete picks[matchId];
-    } else {
-      picks[matchId] = { homeGoals: parseInt(home) || 0, awayGoals: parseInt(away) || 0 };
-    }
-  });
-  savePicks(currentUser, picks);
-  alert('Palpites salvos!');
-});
-
-function displayResults() {
-  const results = getResults();
-  resultsView.innerHTML = `<table><thead><tr><th>Jogo</th><th>Resultado</th></tr></thead><tbody>${matches.map(m => `<tr><td>${m.id}. ${m.home} x ${m.away}</td><td>${results[m.id] ? results[m.id].homeGoals + ' x ' + results[m.id].awayGoals : '-'}</td></tr>`).join('')}</tbody></table>`;
-}
-
-function updateRanking() {
-  const users = getUsers().filter(u => u.role !== 'admin');
-  const results = getResults();
-  const rankings = users.map(u => {
-    const picks = getPicks(u.username);
-    let points = 0;
-    let exact = 0;
-    matches.forEach(m => {
-      const res = results[m.id];
-      const pick = picks[m.id];
-      if (res && pick) {
-        const resDiff = res.homeGoals - res.awayGoals;
-        const pickDiff = pick.homeGoals - pick.awayGoals;
-        if (res.homeGoals === pick.homeGoals && res.awayGoals === pick.awayGoals) {
-          points += 3;
-          exact++;
-        } else if (resDiff === pickDiff) {
-          points += 1;
+        // Ensure admin exists
+        if (!users.find(u => u.name === 'ADM')) {
+            users.push({ name: 'ADM', password: 'admin' });
+            saveUsers();
         }
-      }
-    });
-    return { username: u.username, points, exact };
-  });
-  rankings.sort((a,b) => b.points - a.points);
-  rankingBody.innerHTML = rankings.map((r, idx) => `<tr><td>${idx+1}</td><td>${r.username}</td><td>${r.points}</td><td>${r.exact}</td></tr>`).join('');
-}
 
-// Initial UI state
-loginSection.style.display = 'block';
-</script>
+        function saveUsers() {
+            localStorage.setItem('bolao_users', JSON.stringify(users));
+        }
+        function savePalpitesToStorage() {
+            localStorage.setItem('bolao_palpites', JSON.stringify(palpites));
+        }
+        function saveResults() {
+            localStorage.setItem('bolao_results', JSON.stringify(officialResults));
+        }
+        function saveBlockStatus() {
+            localStorage.setItem('bolao_blocked', palpitesBlocked.toString());
+        }
+
+        // ========== AUTH ==========
+        function login() {
+            const username = document.getElementById('login-user').value.trim();
+            const password = document.getElementById('login-pass').value.trim();
+            if (!username || !password) {
+                alert('Preencha usuário e senha.');
+                return;
+            }
+            const user = users.find(u => u.name === username && u.password === password);
+            if (!user) {
+                alert('Usuário ou senha inválidos.');
+                return;
+            }
+            currentUser = username;
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('user-panel').classList.remove('hidden');
+            document.getElementById('user-name').textContent = 'Olá, ' + username;
+            document.getElementById('btn-logout').classList.remove('hidden');
+            if (username === 'ADM') {
+                document.getElementById('admin-panel').classList.remove('hidden');
+                loadAdminPanel();
+            } else {
+                document.getElementById('admin-panel').classList.add('hidden');
+            }
+            openTab('ranking');
+            loadUserPanel();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('login-section').classList.remove('hidden');
+            document.getElementById('user-panel').classList.add('hidden');
+            document.getElementById('admin-panel').classList.add('hidden');
+            document.getElementById('btn-logout').classList.add('hidden');
+            document.getElementById('user-name').textContent = '';
+            loadRanking();
+        }
+
+        // ========== UI ==========
+        function openTab(tab) {
+            const tabs = ['ranking', 'my-palpites', 'resultados'];
+            tabs.forEach(t => {
+                document.getElementById('tab-' + t).classList.add('hidden');
+            });
+            document.getElementById('tab-' + tab).classList.remove('hidden');
+            // update active button
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            const buttons = document.querySelectorAll('.tab-button');
+            const index = tabs.indexOf(tab);
+            buttons[index].classList.add('active');
+            if (tab === 'ranking') loadRanking();
+            if (tab === 'my-palpites') loadMyPalpites();
+            if (tab === 'resultados') loadResultados();
+        }
+
+        function loadRanking() {
+            const rankingDiv = document.getElementById('ranking-table');
+            const rankingDivUser = document.getElementById('ranking-table-user');
+            const rankings = calculateRanking();
+            const html = generateRankingTable(rankings);
+            rankingDiv.innerHTML = html;
+            rankingDivUser.innerHTML = html;
+        }
+
+        function calculateRanking() {
+            const usersList = users.filter(u => u.name !== 'ADM');
+            let ranking = usersList.map(u => {
+                const userPalpites = palpites[u.name] || {};
+                let pontos = 0;
+                let exatos = 0;
+                for (const match of matches) {
+                    const palpite = userPalpites[match.id];
+                    const official = officialResults[match.id];
+                    if (palpite && official) {
+                        if (palpite.home === official.home && palpite.away === official.away) {
+                            pontos += 3;
+                            exatos++;
+                        } else if (getResult(palpite.home, palpite.away) === getResult(official.home, official.away)) {
+                            pontos += 1;
+                        }
+                    }
+                }
+                return { name: u.name, pontos, exatos };
+            });
+            ranking.sort((a, b) => b.pontos - a.pontos || b.exatos - a.exatos);
+            return ranking;
+        }
+
+        function getResult(home, away) {
+            if (home > away) return 'home';
+            if (home < away) return 'away';
+            return 'draw';
+        }
+
+        function generateRankingTable(rankings) {
+            let html = '<table><thead><tr><th>Posição</th><th>Nome</th><th>Pontos</th><th>Placares Exatos</th></tr></thead><tbody>';
+            rankings.forEach((r, idx) => {
+                html += `<tr><td>${idx + 1}</td><td>${r.name}</td><td>${r.pontos}</td><td>${r.exatos}</td></tr>`;
+            });
+            html += '</tbody></table>';
+            return html;
+        }
+
+        function loadMyPalpites() {
+            const blockedBanner = document.getElementById('blocked-banner');
+            if (palpitesBlocked) {
+                blockedBanner.classList.remove('hidden');
+            } else {
+                blockedBanner.classList.add('hidden');
+            }
+            const container = document.getElementById('games-container');
+            const userPalpites = palpites[currentUser] || {};
+            let html = '';
+            matches.forEach(m => {
+                const palpite = userPalpites[m.id] || { home: '', away: '' };
+                html += `<div class="game-row">
+                    <span>${m.group}: ${m.home}</span>
+                    <input type="number" min="0" max="99" id="home_${m.id}" value="${palpite.home}" ${palpitesBlocked ? 'disabled' : ''}>
+                    <span>x</span>
+                    <input type="number" min="0" max="99" id="away_${m.id}" value="${palpite.away}" ${palpitesBlocked ? 'disabled' : ''}>
+                    <span>${m.away}</span>
+                </div>`;
+            });
+            container.innerHTML = html;
+            // Load other players' palpites
+            loadOtherPalpites();
+        }
+
+        function savePalpites(event) {
+            event.preventDefault();
+            if (palpitesBlocked) {
+                alert('Palpites estão bloqueados.');
+                return;
+            }
+            const userPalpites = {};
+            matches.forEach(m => {
+                const home = parseInt(document.getElementById(`home_${m.id}`).value) || 0;
+                const away = parseInt(document.getElementById(`away_${m.id}`).value) || 0;
+                userPalpites[m.id] = { home, away };
+            });
+            palpites[currentUser] = userPalpites;
+            savePalpitesToStorage();
+            alert('Palpites salvos!');
+        }
+
+        function loadOtherPalpites() {
+            const container = document.getElementById('other-palpites-table');
+            const otherUsers = users.filter(u => u.name !== currentUser && u.name !== 'ADM');
+            if (otherUsers.length === 0) {
+                container.innerHTML = '<p>Nenhum outro jogador cadastrado.</p>';
+                return;
+            }
+            let html = '<table><thead><tr><th>Jogador</th><th>Jogo</th><th>Palpite</th></tr></thead><tbody>';
+            otherUsers.forEach(u => {
+                const userPalp = palpites[u.name] || {};
+                for (const m of matches) {
+                    const palpite = userPalp[m.id];
+                    if (palpite) {
+                        html += `<tr><td>${u.name}</td><td>${m.home} x ${m.away}</td><td>${palpite.home} x ${palpite.away}</td></tr>`;
+                    }
+                }
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function loadResultados() {
+            const container = document.getElementById('resultados-table');
+            let html = '<table><thead><tr><th>Jogo</th><th>Placar</th></tr></thead><tbody>';
+            matches.forEach(m => {
+                const res = officialResults[m.id];
+                const placar = res ? `${res.home} x ${res.away}` : 'A definir';
+                html += `<tr><td>${m.home} x ${m.away}</td><td>${placar}</td></tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function loadUserPanel() {
+            loadRanking();
+            loadMyPalpites();
+            loadResultados();
+        }
+
+        // ========== ADMIN ==========
+        function loadAdminPanel() {
+            loadUserList();
+            document.getElementById('block-palpites').checked = palpitesBlocked;
+            loadAdminResultados();
+        }
+
+        function loadUserList() {
+            const container = document.getElementById('user-list');
+            const nonAdmin = users.filter(u => u.name !== 'ADM');
+            let html = '';
+            nonAdmin.forEach(u => {
+                html += `<div class="user-item">
+                    <span>${u.name}</span>
+                    <button onclick="deleteUser('${u.name}')" class="btn-danger">Deletar</button>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function addUser() {
+            const name = document.getElementById('new-user-name').value.trim();
+            if (!name) {
+                alert('Informe o nome do usuário.');
+                return;
+            }
+            if (users.find(u => u.name === name)) {
+                alert('Usuário já existe.');
+                return;
+            }
+            let pass = document.getElementById('new-user-pass').value.trim();
+            if (!pass) {
+                // generate random 6-digit
+                pass = Math.floor(100000 + Math.random() * 900000).toString();
+            }
+            users.push({ name, password: pass });
+            saveUsers();
+            alert(`Usuário ${name} cadastrado com senha: ${pass}`);
+            document.getElementById('new-user-name').value = '';
+            document.getElementById('new-user-pass').value = '';
+            loadUserList();
+        }
+
+        function deleteUser(name) {
+            if (!confirm(`Deletar usuário ${name}?`)) return;
+            users = users.filter(u => u.name !== name);
+            saveUsers();
+            delete palpites[name];
+            savePalpitesToStorage();
+            loadUserList();
+        }
+
+        function toggleBlock() {
+            palpitesBlocked = document.getElementById('block-palpites').checked;
+            saveBlockStatus();
+            if (currentUser && currentUser !== 'ADM') {
+                loadMyPalpites();
+            }
+        }
+
+        function loadAdminResultados() {
+            const container = document.getElementById('admin-resultados');
+            let html = '';
+            matches.forEach(m => {
+                const res = officialResults[m.id] || { home: '', away: '' };
+                html += `<div class="game-row">
+                    <span>${m.home}</span>
+                    <input type="number" min="0" max="99" id="admin_home_${m.id}" value="${res.home}">
+                    <span>x</span>
+                    <input type="number" min="0" max="99" id="admin_away_${m.id}" value="${res.away}">
+                    <span>${m.away}</span>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function saveOfficialResults() {
+            matches.forEach(m => {
+                const home = parseInt(document.getElementById(`admin_home_${m.id}`).value) || 0;
+                const away = parseInt(document.getElementById(`admin_away_${m.id}`).value) || 0;
+                officialResults[m.id] = { home, away };
+            });
+            saveResults();
+            alert('Resultados oficiais salvos!');
+            if (currentUser && currentUser === 'ADM') {
+                loadAdminResultados(); // refresh
+            }
+        }
+
+        // ========== INIT ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRanking();
+        });
+    </script>
 </body>
 </html>
